@@ -70,7 +70,7 @@ def get_personajes():
     if conn:
         try:
             cursor = conn.cursor(as_dict=True)
-            cursor.execute("SELECT id, name, email FROM personajes")
+            cursor.execute("SELECT id, name, email, whatsapp FROM personajes")
             personajes = cursor.fetchall()
             return jsonify(personajes), 200
         except Exception as e:
@@ -90,7 +90,7 @@ def get_personaje(id):
         try:
             cursor = conn.cursor(as_dict=True)
             cursor.execute(
-                "SELECT id, name, email FROM personajes WHERE id = %d", (id,))
+                "SELECT id, name, email, whatsapp FROM personajes WHERE id = %d", (id,))
             personaje = cursor.fetchone()
             if personaje:
                 return jsonify(personaje), 200
@@ -109,9 +109,11 @@ def get_personaje(id):
 @app.route('/personajes', methods=['POST'])
 def create_personaje():
     data = request.get_json()
+    print(data, "DATA")
     id = data.get('id')
     name = data.get('name')
     email = data.get('email')
+    whatsapp = data.get('whatsapp')
 
     if not id or not name or not email:
         return jsonify({'error': 'Se requiere id, nombre y correo electrónico'}), 400
@@ -121,7 +123,7 @@ def create_personaje():
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO personajes (id, name, email) VALUES (%d, %s, %s)", (id, name, email))
+                "INSERT INTO personajes (id, name, email, whatsapp) VALUES (%d, %s, %s, %s)", (id, name, email, whatsapp))
             conn.commit()
             return jsonify({'mensaje': 'Personaje creado exitosamente'}), 201
         except Exception as e:
@@ -140,6 +142,7 @@ def update_personaje(id):
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
+    whatsapp = data.get('whatsapp')
 
     if not name or not email:
         return jsonify({'error': 'Se requiere nombre y correo electrónico'}), 400
@@ -147,9 +150,11 @@ def update_personaje(id):
     conn = get_db_connection()
     if conn:
         try:
+
+            print(data, " DATA QUE LLEGO")
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE personajes SET name = %s, email = %s WHERE id = %d", (name, email, id))
+                "UPDATE personajes SET name = %s, email = %s, whatsapp = %s WHERE id = %d", (name, email, whatsapp, id))
             conn.commit()
             if cursor.rowcount > 0:
                 return jsonify({'mensaje': 'Personaje actualizado exitosamente'}), 200
